@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>내배캠 최고 평점 영화 콜렉션</title>
+    <script>
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMTAxNWE4MDU5ZTY0ZDIxNzc2YjRiZTJhYzJlZmMyZCIsInN1YiI6IjY1OTlkZDA1NGQwZThkMDE0ODk3YzE2OSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.6Sn6j08Zi37EnSR1iMKFJyWwr8T-S9K0O4EjvksyJks",
+        },
+      };
+
+      const getImageUrl = (path, size = 400) => {
+        return `https://image.tmdb.org/t/p/w${size}${path}`;
+      };
+
+      let movies;
+
+      function handleSearch(event) {
+        event.preventDefault(); // Prevent form submission
+        const searchWord = document.querySelector("#search-input").value;
+
+        // Check if movies is defined
+        if (!movies) {
+          return; // Exit the function if movies is not defined
+        }
+
+        const filteredMovies = movies.filter((movie) => {
+          return movie.title.toLowerCase().includes(searchWord.toLowerCase());
+        });
+
+        renderCards(filteredMovies);
+      }
+
+      function renderCards(movies) {
+        const cardList = document.querySelector(".card-list");
+        cardList.innerHTML = ""; // Clear existing cards
+
+        movies.forEach((movie) => {
+          const card = document.createElement("div");
+          card.classList.add("movie-card");
+
+          card.innerHTML = `
+          <img src="${getImageUrl(movie.poster_path)}" alt="${movie.title}">
+          <h3 class="movie-title">${movie.title}</h3>
+          <p>${movie.overview}</p>
+          <p>Rating: ${movie.vote_average}</p>
+        `;
+
+          cardList.appendChild(card);
+        });
+      }
+
+      fetch(
+        "https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1",
+        options
+      )
+        .then((response) => response.json())
+        .then((response) => {
+          // 영화 정보에서 필요한 정보를 추출한다.
+          const adult = response.adult;
+          const backdrop_path = response.backdrop_path;
+          const genre_ids = response.genre_ids;
+          const id = response.id;
+          const original_language = response.original_language;
+          const original_title = response.original_title;
+          const overview = response.overview;
+          const popularity = response.popularity;
+          const poster_path = response.poster_path;
+          const release_data = response.release_data;
+          const title = response.title;
+          const video = response.video;
+          const vote_average = response.vote_average;
+          const vote_count = response.vote_count;
+
+          // 추출한 정보를 하나의 객체에 넣는다.
+          const movie = {
+            adult,
+            backdrop_path,
+            genre_ids,
+            id,
+            original_language,
+            original_title,
+            overview,
+            popularity,
+            poster_path,
+            release_data,
+            title,
+            video,
+            vote_average,
+            vote_count,
+          };
+
+          // 객체를 콘솔에 출력한다.
+          console.log(movie);
+
+          const data = JSON.stringify([response]);
+
+          movies = response.results;
+
+          console.log(movies);
+
+          movies.forEach((movie) => {
+            const cardList = document.querySelector(".card-list");
+            const card = document.createElement("div");
+            card.classList.add("movie-card");
+
+            card.innerHTML = `
+              <img src="${getImageUrl(movie.poster_path)}" alt="${movie.title}">
+              <h3 class="movie-title">${movie.title}</h3>
+              <p>${movie.overview}</p>
+              <p>Rating: ${movie.vote_average}</p>
+            `;
+
+            cardList.appendChild(card);
+          });
+        })
+        .catch((err) => console.error(err));
+    </script>
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .body {
+      background: url("../assets/bg.png") center/cover no-repeat;
+      min-height: 100vh;
+    }
+
+    .card-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      justify-content: center;
+    }
+
+    .movie-card {
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.24);
+      margin: 20px;
+      padding: 20px;
+      width: 300px;
+      justify-self: center;
+      background-color: bisque;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .movie-card img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    header {
+      background-color: #ffe194;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 0;
+    }
+
+    .search {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 20px 0;
+      border-bottom: 1px solid black;
+    }
+
+    .search label {
+      font-size: 25px;
+    }
+
+    .search input {
+      margin-left: 20px;
+      min-width: 200px;
+      padding: 5px 10px;
+    }
+
+    .search button {
+      margin-left: 10px;
+      padding: 5px;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+    }
+  </style>
+  <body>
+    <header>
+      <h1>내배캠 최고 평점 영화 콜렉션</h1>
+    </header>
+
+    <script>
+      const searchInput = document.querySelector("#search-input");
+
+      if (searchInput) {
+        searchInput.addEventListener("input", handleSearch);
+
+        searchInput.addEventListener("keyup", function (event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            alert("ENTER !!!");
+          }
+        });
+      }
+    </script>
+
+    <form class="search" onsubmit="handleSearch(event)">
+      <label>영화 검색 : </label>
+      <input
+        type="text"
+        id="search-input"
+        placeholder="영화 제목을 검색해 보세요"
+      />
+      <button type="submit" id="search-btn">검색</button>
+    </form>
+    <br />
+    <section class="card-list"></section>
+  </body>
+</html>
